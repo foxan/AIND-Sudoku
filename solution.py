@@ -1,4 +1,24 @@
+import itertools
+
 assignments = []
+
+digits = "123456789"
+rows = "ABCDEFGHI"
+cols = digits
+
+def cross(A, B):
+    "Cross product of elements in A and elements in B."
+    return [a + b for a in A for b in B]
+
+boxes = cross(rows, cols)
+row_units = [cross(r, cols) for r in rows]
+column_units = [cross(rows, c) for c in cols]
+square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
+diagonal_units = [[r + c for (r, c) in zip(rows, cols)], [r + c for (r, c) in zip(rows, cols[::-1])]]
+# diagonal_units = list(map((lambda rc: [r + c for (r, c) in rc]), [zip(rows, cols), zip(rows, cols[::-1])]))
+unitlist = row_units + column_units + square_units + diagonal_units
+units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
+peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)
 
 def assign_value(values, box, value):
     """
@@ -23,13 +43,21 @@ def naked_twins(values):
     Returns:
         the values dictionary with the naked twins eliminated from peers.
     """
+    # Find all instances of two digits
+    two_digits = [box for box in values.keys() if len(values[box]) == 2]
+    twins = []
+    for a, b in itertools.combinations(two_digits, r=2):
+        # Find all instances of naked twins
+        if (len(values[a]) == 2) & (values[a] == values[b]) & (b in peers[a]):
+            twins.append([a, b])
 
-    # Find all instances of naked twins
-    # Eliminate the naked twins as possibilities for their peers
-
-def cross(A, B):
-    "Cross product of elements in A and elements in B."
-    return [a + b for a in A for b in B]
+    for a, b in twins:
+        common_peers = set(peers[a]) & set(peers[b])
+        for peer in common_peers:
+            for digit in values[a]:
+                # Eliminate the naked twins as possibilities for their peers
+                assign_value(values, peer, values[peer].replace(digit, ""))
+    return values
 
 def grid_values(grid):
     """
@@ -42,7 +70,6 @@ def grid_values(grid):
             Values: The value in each box, e.g., '8'. If the box has no value, then the value will be '123456789'.
     """
     chars = []
-    digits = "123456789"
     for c in grid:
         if c in digits:
             chars.append(c)
@@ -89,6 +116,7 @@ def reduce_puzzle(values):
         solved_values_before = len([box for box in values.keys() if len(values[box]) == 1])
         values = eliminate(values)
         values = only_choice(values)
+        values = naked_twins(values)
         solved_values_after = len([box for box in values.keys() if len(values[box]) == 1])
         stalled = solved_values_before == solved_values_after
         if len([box for box in values.keys() if len(values[box]) == 0]):
@@ -122,21 +150,10 @@ def solve(grid):
     Returns:
         The dictionary representation of the final sudoku grid. False if no solution exists.
     """
-    return search(grid_values(grid))
+    values = grid_values(grid)
+    return search(values)
 
 if __name__ == '__main__':
-    digits = "123456789"
-    rows = "ABCDEFGHI"
-    cols = digits
-
-    boxes = cross(rows, cols)
-    row_units = [cross(r, cols) for r in rows]
-    column_units = [cross(rows, c) for c in cols]
-    square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
-    unitlist = row_units + column_units + square_units
-    units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
-    peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)
-
     diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
     display(solve(diag_sudoku_grid))
     try:
