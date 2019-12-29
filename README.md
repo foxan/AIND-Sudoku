@@ -1,7 +1,12 @@
 # Artificial Intelligence Nanodegree
 ## Introductory Project: Diagonal Sudoku Solver
 
-# Question 1 (Naked Twins)
+## Summary
+This project is to create an AI agent to solve Sodoku. Multiple functions have been implemented to reduce the solution space. For example, constraint propagation is used to solved a particular case in Sudoku (naked twins problems) by eliminating values from common peers of the naked twins.
+
+---
+
+### Question 1 (Naked Twins)
 Q: How do we use constraint propagation to solve the naked twins problem?  
 A: To solve the naked twins problem, a function `naked_twins` is defined and used to eliminate values from common peers of the naked twins.
 
@@ -23,7 +28,7 @@ def reduce_puzzle(values):
     return values
 ```
 
-# Question 2 (Diagonal Sudoku)
+### Question 2 (Diagonal Sudoku)
 Q: How do we use constraint propagation to solve the diagonal sudoku problem?  
 A: To solve the diagonal sudoku problem, I have defined the two diagonal units and added them to the unit list.
 
@@ -33,6 +38,8 @@ unitlist = row_units + column_units + square_units + diagonal_units
 ```
 
 Units, peers and other dependencies will then be updated and puzzle checking will be applied to those diagonal units.
+
+---
 
 ### Install
 
